@@ -73,8 +73,10 @@ def guardarCambios(empleados: list):
         escritorDict.writeheader()
         escritorDict.writerows(empleados)
 
-# funcion que verifica si el legajo introducido pertenece a un epmleado 		
-def verificarLegajo(legajoUsuario: int, empleados: list):
+# funcion que verifica si el legajo introducido pertenece a un empleado
+# si el legajo pertenece a un empleado
+# so no pertenece a un empleado devuelve un error 		
+def verificarLegajo(empleados: list, legajoUsuario: int):
     if not empleados:
         raise ValueError("Error: no hay empleados cargados.")
 
@@ -82,30 +84,47 @@ def verificarLegajo(legajoUsuario: int, empleados: list):
 	
     for empleado in empleados:
         if empleado["Legajo"] == legajoUsuario:
-            encontrado = True
-            return(empleado)
+            return("Empleado validado")
 
     if not encontrado:
         raise ValueError(f'Error: no se encontro empleado para el legajo introducido.')
+	
+def buscarEmpleado(empleados: list, legajoEmpleado: int):
+	if not empleados: raise ValueError("Error: no hay empleados cargados.")
+	
+	encontrado = False
+		
+	for empleado in empleados:
+		if empleado["Legajo"] == legajoEmpleado:
+			return(empleado)
+	
+	if not encontrado:
+		raise ValueError(f'Error: no se encontro empleado para el legajo introducido.')
+
 
 # funcion que verifica que el empleado tenga suficientes dias disponibles
 def verificarSaldo(empleado: dict, diasPedidos: int):
 	if not empleado:
 		raise ValueError("Error: no hay empleado cargado.")
 	
-	if diasPedidos <= empleado["DiasDisponibles"]:
-		return(True)
-	else: return(False)
+	return(diasPedidos <= empleado["DiasDisponibles"])
 
-# funcion que actualiza datos de epmleado
+# funcion que actualiza datos del epmleado, restando sus dias disponibles con los dias pedidos
 def actualizarEmpleado(empleadoCargado: dict, empleados: list, diasPedidos: int):
-	if not empleado:
+	if not empleadoCargado:
 		raise ValueError("Error: no hay empleado cargado.")
+	if not empleados:
+		raise ValueError("Error: no hay empleados cargados.")
+	if not diasPedidos:
+		raise ValueError("Error: no hay dias pedidos.")
 	
-	empleado["DiasDisponibles"] -= diasPedidos
+	empleadoCargado["DiasDisponibles"] -= diasPedidos
+
 	for empleado in empleados:
 		if empleado["Legajo"] == empleadoCargado["Legajo"]:
-			empleado = empleadoCargado
-			break
+			empleado.update(empleadoCargado)
+	
+	guardarCambios(empleados)
+
 
 # Hay que agregar funcion que loguee solicitud a solicitudes.csv
