@@ -21,8 +21,10 @@ Base de datos simulada
 El sistema trabaja con:
 
 empleados.csv → datos de empleados y días disponibles
+
 solicitudes.csv → historial de solicitudes
-Flujo
+
+Flujo:
 
 El flujo sigue la lógica definida en el diagrama BPMN:
 
