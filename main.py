@@ -12,7 +12,7 @@ def main():
 		print(f"Estado: {estado}\n")
 
 		empleado = buscarEmpleado(empleados, legajo)
-		print(empleado)
+
 		pedirDias = validarInputNumero(f"Cuantos dias desea solicitar, {empleado["Nombre"]}?\nIntroducir dias: ")
 		estado = "Validando solicitud"
 		print(f"Estado: {estado}\n")
