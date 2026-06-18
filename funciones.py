@@ -45,7 +45,27 @@ def inputInt(mensaje, minimum=None, maximum=None):
 			print(f"El número debe ser <= {maximum}.")
 			continue
 		return v
-	
+
+# Funcion que recibe una fecha en formato DD/MM
+# valida que dia y mes sean numericos y esten dentro de rangos validos
+def validarFecha(mensaje):
+	while True:
+		fecha = input(mensaje).strip()
+
+		partes = fecha.split("/")
+
+		if len(partes) == 2:
+			dia, mes = partes
+
+			if dia.isdigit() and mes.isdigit():
+				dia = int(dia)
+				mes = int(mes)
+
+				if 1 <= dia <= 31 and 1 <= mes <= 12:
+					return fecha
+		
+		print("Formato esperado: DD/MM")
+
 # ========== FUNCIONES ==========
 
 # funcion que devuelve filas de csv como lista de diccionarios con dupla key-value
@@ -86,6 +106,7 @@ def verificarLegajo(empleados: list, legajoUsuario: int):
         if empleado["Legajo"] == legajoUsuario:
             return("Empleado validado")
 
+	# caso infeliz 1: legajo inexistente
     if not encontrado:
         raise ValueError(f'Error: no se encontro empleado para el legajo introducido.')
 	
@@ -116,7 +137,7 @@ def actualizarEmpleado(empleadoCargado: dict, empleados: list, diasPedidos: int)
 	if not empleados:
 		raise ValueError("Error: no hay empleados cargados.")
 	if not diasPedidos:
-		raise ValueError("Error: no hay dias pedidos.")
+		raise ValueError("Error: no hay días pedidos.")
 	
 	empleadoCargado["DiasDisponibles"] -= diasPedidos
 
@@ -127,8 +148,35 @@ def actualizarEmpleado(empleadoCargado: dict, empleados: list, diasPedidos: int)
 	guardarCambios(empleados)
 
 # funcion que recibe empleado y se le registra el pedido de vacaciones
-def cargarSolicitud(empleado: dict, fechas: list):
-	columnas = ["Legajo","Nombre","Vacaciones"]
+def cargarSolicitud(empleado: dict, fechas: list, estado: str):
+	columnas = ["Legajo","Nombre","Vacaciones", "Estado"]
 
-	with open("solicitudes.csv", "w", newline="", encoding="utf-8") as archivo:
-		pass
+	try:
+		# Intenta abrir el modo lectura para saber si existe
+		with open("solicitudes.csv", "r", encoding="utf-8") as archivo:
+			existe = True
+	except FileNotFoundError:
+		existe = False
+
+	# Si no existe, lo crea con encabezados
+	if not existe:
+		with open("solicitudes.csv", "w", newline="", encoding="utf-8") as archivo:
+			escritor = csv.DictWriter(archivo, fieldnames=columnas)
+			escritor.writeheader()
+			escritor.writerow({
+				"Legajo": empleado["Legajo"],
+				"Nombre": empleado["Nombre"],
+				"Vacaciones": f"{fechas[0]} - {fechas[1]}",
+				"Estado": estado
+			})
+	
+	else:
+		# Si ya existe, solo agrega una nueva fila
+		with open("solicitudes.csv", "a", newline="", encoding="utf-8") as archivo:
+			escritor = csv.DictWriter(archivo, fieldnames=columnas)
+			escritor.writerow({
+				"Legajo": empleado["Legajo"],
+				"Nombre": empleado["Nombre"],
+				"Vacaciones": f"{fechas[0]} - {fechas[1]}",
+				"Estado": estado
+			})
