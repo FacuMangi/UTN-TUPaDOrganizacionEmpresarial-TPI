@@ -126,5 +126,9 @@ def actualizarEmpleado(empleadoCargado: dict, empleados: list, diasPedidos: int)
 	
 	guardarCambios(empleados)
 
+# funcion que recibe empleado y se le registra el pedido de vacaciones
+def cargarSolicitud(empleado: dict, fechas: list):
+	columnas = ["Legajo","Nombre","Vacaciones"]
 
-# Hay que agregar funcion que loguee solicitud a solicitudes.csv
+	with open("solicitudes.csv", "w", newline="", encoding="utf-8") as archivo:
+		pass
