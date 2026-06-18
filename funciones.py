@@ -93,9 +93,7 @@ def verificarSaldo(empleado: dict, diasPedidos: int):
 	if not empleado:
 		raise ValueError("Error: no hay empleado cargado.")
 	
-	if diasPedidos <= empleado["DiasDisponibles"]:
-		return(True)
-	else: return(False)
+	return(diasPedidos <= empleado["DiasDisponibles"])
 
 # funcion que actualiza datos de epmleado
 def actualizarEmpleado(empleadoCargado: dict, empleados: list, diasPedidos: int):
