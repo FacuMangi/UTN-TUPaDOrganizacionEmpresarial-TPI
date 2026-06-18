@@ -107,3 +107,5 @@ def actualizarEmpleado(empleadoCargado: dict, empleados: list, diasPedidos: int)
 		if empleado["Legajo"] == empleadoCargado["Legajo"]:
 			empleado = empleadoCargado
 			break
+
+# Hay que agregar funcion que loguee solicitud a solicitudes.csv
