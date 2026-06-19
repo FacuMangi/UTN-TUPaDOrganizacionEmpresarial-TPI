@@ -38,12 +38,10 @@ def main():
 			else: 
 				# Caso infeliz 3: supervisor rechaza
 				print("Su solicitud fue rechazada.")
-				cargarSolicitud(empleado, fechas, "RECHAZADA - SUPERVISOR")
 
 		else:
 			# Caso infeliz 2: saldo insuficiente 
 			print("No cuenta con la cantidad de días suficiente.")
-			cargarSolicitud(empleado, fechas, "RECHAZADA - SALDO INSUFICIENTE")
 
 			estado = "Chat finalizado"		
 			print(f"Estado: {estado}\n")
