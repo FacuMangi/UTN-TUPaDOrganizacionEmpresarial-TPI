@@ -1,55 +1,82 @@
 from funciones import *
 
+ESTADOS = {
+    "INICIO",
+    "ESPERANDO_LEGAJO",
+    "LEGAJO_VALIDADO",
+    "CARGANDO_SOLICITUD",
+    "PENDIENTE_APROBACION",
+    "APROBADA",
+    "RECHAZADA",
+    "ERROR",
+}
+
+def transicionar(estado_actual: str, nuevo_estado: str) -> str:
+    print(f"  [transición] {estado_actual} → {nuevo_estado}")
+    return nuevo_estado
+
 def main():
-	try:
-		estado = "Chat inicializado"		
-		print(f"Estado: {estado}\n")
+    estado = transicionar("—", "INICIO")
+    empleados = []
+    empleado = None
 
-		empleados = cargarEmpleados()
-		
-		legajo = validarInputNumero("Bienvenido. Ingrese su legajo: ")
-		estado = verificarLegajo(empleados, legajo)
-		print(f"Estado: {estado}\n")
+    try:
+        empleados = cargarEmpleados()
 
-		empleado = buscarEmpleado(empleados, legajo)
+        # ── Estado: ESPERANDO_LEGAJO ──────────────────────────────────────
+        estado = transicionar(estado, "ESPERANDO_LEGAJO")
+        # validarInputNumero ya maneja entradas inválidas internamente
+        # (loop hasta recibir un entero positivo)
+        legajo = validarInputNumero("Bienvenido. Ingrese su legajo: ")
 
-		pedirDias = validarInputNumero(f"Cuántos días desea solicitar, {empleado["Nombre"]}?\nIntroducir días: ")
-		
-		fechas = [] 
-		fechas.append(validarFecha(f"Introduzca fecha de inicio (DD/MM): "))
-		fechas.append(validarFecha(f"Introduzca fecha de fin (DD/MM): "))
+        try:
+            verificarLegajo(empleados, legajo)
+            empleado = buscarEmpleado(empleados, legajo)
+        except ValueError as e:
+            # Legajo inexistente → transición directa a RECHAZADA
+            estado = transicionar(estado, "RECHAZADA")
+            print(f"Acceso denegado: {e}")
+            return
 
-		estado = "Validando solicitud"
-		print(f"Estado: {estado}\n")
+        # ── Estado: LEGAJO_VALIDADO ───────────────────────────────────────
+        estado = transicionar(estado, "LEGAJO_VALIDADO")
+        print(f"Bienvenido, {empleado['Nombre']}. "
+              f"Días disponibles: {empleado['DiasDisponibles']}\n")
 
-		# la funcion verificarSaldo devuelve True o False, si devuelve True es que tiene dias suficientes
-		if verificarSaldo(empleado, pedirDias):
+        # ── Estado: CARGANDO_SOLICITUD ────────────────────────────────────
+        estado = transicionar(estado, "CARGANDO_SOLICITUD")
+        # validarInputNumero y validarFecha manejan entradas inválidas internamente
+        dias = validarInputNumero(
+            f"¿Cuántos días desea solicitar, {empleado['Nombre']}? "
+        )
+        fecha_inicio = validarFecha("Fecha de inicio (DD/MM): ")
+        fecha_fin    = validarFecha("Fecha de fin   (DD/MM): ")
+        fechas = [fecha_inicio, fecha_fin]
 
-			# Decisión del supervisor
-			if validarInputTexto("Supervisor aprueba? (s/n)\nIntroducir respuesta: ").lower() == "s":
-				
-				actualizarEmpleado(empleado, empleados, pedirDias)
-				
-				# Caso feliz: supervisor aprueba
-				print(f"RRHH está registrando su ausencia.\nSu solicitud fue aprobada")
+        # Verificar saldo antes de llegar al supervisor
+        if not verificarSaldo(empleado, dias):
+            estado = transicionar(estado, "RECHAZADA")
+            print(f"Solicitud rechazada: no cuenta con {dias} días disponibles "
+                  f"(disponibles: {empleado['DiasDisponibles']}).")
+            return
 
-				cargarSolicitud(empleado, fechas, "APROBADA")
+        # ── Estado: PENDIENTE_APROBACION ──────────────────────────────────
+        estado = transicionar(estado, "PENDIENTE_APROBACION")
+        respuesta = validarInputTexto("¿El supervisor aprueba? (s/n): ").lower()
 
-			else: 
-				# Caso infeliz 3: supervisor rechaza
-				print("Su solicitud fue rechazada.")
+        if respuesta == "s":
+            actualizarEmpleado(empleado, empleados, dias)
+            cargarSolicitud(empleado, fechas, "APROBADA")
+            estado = transicionar(estado, "APROBADA")
+            print("Solicitud aprobada. RRHH registró la ausencia.")
+        else:
+            cargarSolicitud(empleado, fechas, "RECHAZADA")
+            estado = transicionar(estado, "RECHAZADA")
+            print("Solicitud rechazada por el supervisor.")
 
-		else:
-			# Caso infeliz 2: saldo insuficiente 
-			print("No cuenta con la cantidad de días suficiente.")
-
-			estado = "Chat finalizado"		
-			print(f"Estado: {estado}\n")
-
-	except Exception as e:
-		print(f'Error en estado: {estado}.\nError: {e}\n')
-		estado = "Chat finalizado"		
-		print(f"Estado: {estado}\n")
+    except Exception as e:
+        estado = transicionar(estado, "ERROR")
+        print(f"Error inesperado en estado {estado}: {e}")
 
 if __name__ == "__main__":
     main()
